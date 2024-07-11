@@ -5,33 +5,52 @@ from datetime import datetime, timedelta
 # Function to read authorization data from file
 def read_auth_data():
     with open('data.txt', 'r') as file:
-        return file.read().strip()
-
-# URL and headers
-url = 'https://tg.pumpad.io/referral/api/v1/lottery'
-headers = {
-    'Authorization': read_auth_data(),
-    'Content-Type': 'application/json'
-}
+        lines = file.readlines()
+        accounts = []
+        for line in lines:
+            accounts.append(line.strip())
+        return accounts
 
 # Function to spin the lottery
-def spin_lottery():
+def spin_lottery(url, headers):
     response = requests.post(url, headers=headers)
     if response.status_code == 200:
         print(f"[{datetime.now()}] Lottery spun successfully. Response: {response.json()}")
     else:
         print(f"[{datetime.now()}] Failed to spin lottery. Status Code: {response.status_code}")
 
-# Spin the lottery 10 times, once per day
-for i in range(1, 11):
-    print(f"Spinning lottery attempt {i}...")
-    spin_lottery()
-    
-    # Calculate the time for next spin
-    next_day = datetime.now() + timedelta(days=1)
-    print(f"Next spin will be at {next_day.strftime('%Y-%m-%d %H:%M:%S')}")
-    
-    # Sleep for 1 day (86400 seconds)
-    time.sleep(86400)
+# Main function to spin lottery 10 times daily
+def spin_lottery_daily():
+    accounts = read_auth_data()
+    num_accounts = len(accounts)
+    print(f"Total accounts found in data.txt: {num_accounts}")
 
-print("All spins completed.")
+    for account_index, account in enumerate(accounts, start=1):
+        url = 'https://tg.pumpad.io/referral/api/v1/lottery'
+        headers = {
+            'Authorization': account,
+            'Content-Type': 'application/json'
+        }
+
+        print(f"Using account {account_index} of {num_accounts}: {account}")
+        
+        for day in range(1, 11):
+            print(f"Starting lottery spins for day {day}...")
+
+            for attempt in range(1, 11):
+                print(f"Attempt {attempt}:")
+                spin_lottery(url, headers)
+                time.sleep(10)  # Wait 10 seconds between attempts
+            
+            # Calculate next day's time and countdown
+            if day < 10:
+                next_day = datetime.now() + timedelta(days=1)
+                print(f"Next spins will start at {next_day.strftime('%Y-%m-%d %H:%M:%S')}")
+                time_until_next_day = (next_day - datetime.now()).total_seconds()
+                print(f"Countdown until next spins: {timedelta(seconds=time_until_next_day)}")
+                time.sleep(time_until_next_day)
+
+    print("All daily spins completed.")
+
+# Start spinning the lottery daily
+spin_lottery_daily()
