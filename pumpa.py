@@ -1,5 +1,6 @@
 import requests
 import time
+from datetime import datetime, timedelta
 
 # Function to read authorization data from file
 def read_auth_data():
@@ -17,11 +18,20 @@ headers = {
 def spin_lottery():
     response = requests.post(url, headers=headers)
     if response.status_code == 200:
-        print(f"Lottery spun successfully. Response: {response.json()}")
+        print(f"[{datetime.now()}] Lottery spun successfully. Response: {response.json()}")
     else:
-        print(f"Failed to spin lottery. Status Code: {response.status_code}")
+        print(f"[{datetime.now()}] Failed to spin lottery. Status Code: {response.status_code}")
 
 # Spin the lottery 10 times, once per day
-for _ in range(10):
+for i in range(1, 11):
+    print(f"Spinning lottery attempt {i}...")
     spin_lottery()
-    time.sleep(86400)  # Sleep for 1 day (86400 seconds)
+    
+    # Calculate the time for next spin
+    next_day = datetime.now() + timedelta(days=1)
+    print(f"Next spin will be at {next_day.strftime('%Y-%m-%d %H:%M:%S')}")
+    
+    # Sleep for 1 day (86400 seconds)
+    time.sleep(86400)
+
+print("All spins completed.")
