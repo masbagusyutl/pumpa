@@ -6,10 +6,8 @@ from datetime import datetime, timedelta
 def read_auth_data():
     with open('data.txt', 'r') as file:
         lines = file.readlines()
-        accounts = []
-        for line in lines:
-            accounts.append(line.strip())
-        return accounts
+        accounts = [line.strip() for line in lines]
+    return accounts
 
 # Function to spin the lottery
 def spin_lottery(url, headers):
@@ -25,7 +23,7 @@ def countdown_timer(seconds):
         print(f"Countdown: {str(timedelta(seconds=seconds))} remaining", end="\r")
         time.sleep(1)
         seconds -= 1
-    print("Countdown complete.")
+    print("\nCountdown complete.")
 
 # Main function to spin lottery 10 times daily
 def spin_lottery_daily():
@@ -33,30 +31,34 @@ def spin_lottery_daily():
     num_accounts = len(accounts)
     print(f"Total accounts found in data.txt: {num_accounts}")
 
-    for account_index, account in enumerate(accounts, start=1):
-        url = 'https://tg.pumpad.io/referral/api/v1/lottery'
-        headers = {
-            'Authorization': account,
-            'Content-Type': 'application/json'
-        }
+    for day in range(1, 11):
+        print(f"\nStarting lottery spins for day {day}...\n")
 
-        print(f"Using account {account_index} of {num_accounts}: {account}")
-        
-        for day in range(1, 11):
-            print(f"Starting lottery spins for day {day}...")
+        for account_index, account in enumerate(accounts, start=1):
+            url = 'https://tg.pumpad.io/referral/api/v1/lottery'
+            headers = {
+                'Authorization': account,
+                'Content-Type': 'application/json'
+            }
 
+            print(f"Using account {account_index} of {num_accounts}: {account}")
+            
             for attempt in range(1, 11):
                 print(f"Attempt {attempt}:")
                 spin_lottery(url, headers)
                 time.sleep(10)  # Wait 10 seconds between attempts
             
-            # Calculate next day's time and countdown
-            if day < 10:
-                next_day = datetime.now() + timedelta(days=1)
-                print(f"Next spins will start at {next_day.strftime('%Y-%m-%d %H:%M:%S')}")
-                time_until_next_day = (next_day - datetime.now()).total_seconds()
-                print(f"Countdown until next spins:")
-                countdown_timer(int(time_until_next_day))
+            if account_index < num_accounts:
+                print(f"Switching to the next account in 10 seconds...")
+                time.sleep(10)  # Wait 10 seconds before switching to the next account
+
+        # Calculate next day's time and countdown
+        if day < 10:
+            next_day = datetime.now() + timedelta(days=1)
+            print(f"\nNext spins will start at {next_day.strftime('%Y-%m-%d %H:%M:%S')}")
+            time_until_next_day = (next_day - datetime.now()).total_seconds()
+            print(f"Countdown until next spins:")
+            countdown_timer(int(time_until_next_day))
 
     print("All daily spins completed.")
 
