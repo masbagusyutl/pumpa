@@ -19,6 +19,14 @@ def spin_lottery(url, headers):
     else:
         print(f"[{datetime.now()}] Failed to spin lottery. Status Code: {response.status_code}")
 
+# Function to display countdown timer
+def countdown_timer(seconds):
+    while seconds > 0:
+        print(f"Countdown: {str(timedelta(seconds=seconds))} remaining", end="\r")
+        time.sleep(1)
+        seconds -= 1
+    print("Countdown complete.")
+
 # Main function to spin lottery 10 times daily
 def spin_lottery_daily():
     accounts = read_auth_data()
@@ -47,8 +55,8 @@ def spin_lottery_daily():
                 next_day = datetime.now() + timedelta(days=1)
                 print(f"Next spins will start at {next_day.strftime('%Y-%m-%d %H:%M:%S')}")
                 time_until_next_day = (next_day - datetime.now()).total_seconds()
-                print(f"Countdown until next spins: {timedelta(seconds=time_until_next_day)}")
-                time.sleep(time_until_next_day)
+                print(f"Countdown until next spins:")
+                countdown_timer(int(time_until_next_day))
 
     print("All daily spins completed.")
 
