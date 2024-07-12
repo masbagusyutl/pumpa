@@ -9,13 +9,28 @@ def read_auth_data():
         accounts = [line.strip() for line in lines]
     return accounts
 
-# Function to spin the lottery
-def spin_lottery(url, headers):
-    response = requests.post(url, headers=headers)
-    if response.status_code == 200:
-        print(f"[{datetime.now()}] Lottery spun successfully. Response: {response.json()}")
-    else:
-        print(f"[{datetime.now()}] Failed to spin lottery. Status Code: {response.status_code}")
+# Function to visit a URL
+def visit_url(url):
+    try:
+        response = requests.get(url)
+        if response.status_code == 200:
+            print(f"[{datetime.now()}] Visited {url} successfully.")
+        else:
+            print(f"[{datetime.now()}] Failed to visit {url}. Status Code: {response.status_code}")
+    except requests.RequestException as e:
+        print(f"[{datetime.now()}] Error visiting {url}: {e}")
+
+# Function to refresh tasks
+def refresh_tasks(headers):
+    url = 'https://tg.pumpad.io/referral/api/v1/tg/missions'
+    try:
+        response = requests.get(url, headers=headers)
+        if response.status_code == 200:
+            print(f"[{datetime.now()}] Tasks refreshed successfully.")
+        else:
+            print(f"[{datetime.now()}] Failed to refresh tasks. Status Code: {response.status_code}")
+    except requests.RequestException as e:
+        print(f"[{datetime.now()}] Error refreshing tasks: {e}")
 
 # Function to complete a task
 def complete_task(url, headers, payload=None):
@@ -28,6 +43,14 @@ def complete_task(url, headers, payload=None):
         print(f"[{datetime.now()}] Task completed successfully. Response: {response.json()}")
     else:
         print(f"[{datetime.now()}] Failed to complete task. Status Code: {response.status_code}")
+
+# Function to spin the lottery
+def spin_lottery(url, headers):
+    response = requests.post(url, headers=headers)
+    if response.status_code == 200:
+        print(f"[{datetime.now()}] Lottery spun successfully. Response: {response.json()}")
+    else:
+        print(f"[{datetime.now()}] Failed to spin lottery. Status Code: {response.status_code}")
 
 # Function to display countdown timer
 def countdown_timer(seconds):
@@ -59,11 +82,21 @@ def process_single_account(account, account_index, num_spins, complete_tasks_fir
         {"tg_channel_id": "-1002182502398"}   # Task 4
     ]
 
+    visit_urls = [
+        'https://x.com/pumpad_io',  # Visit URL for Task 1
+        'https://x.com/catdrivebitcoin'  # Visit URL for Task 2
+    ]
+
     print(f"Using account {account_index}: {account}")
 
     if complete_tasks_first:
-        for url, payload in zip(task_urls, task_payloads):
+        for i, (url, payload) in enumerate(zip(task_urls, task_payloads)):
+            if i == 0:  # For Task 1
+                visit_url(visit_urls[0])
+            elif i == 1:  # For Task 2
+                visit_url(visit_urls[1])
             complete_task(url, headers, payload)
+            refresh_tasks(headers)
             time.sleep(10)  # Wait 10 seconds between tasks
 
     for attempt in range(1, num_spins + 1):
