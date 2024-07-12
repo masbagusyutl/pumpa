@@ -99,7 +99,7 @@ def spin_lottery_custom():
 
             # Calculate next day's time and countdown
             if day < 10:
-                next_day = datetime.now() + timedelta(days=1)
+                next_day = datetime.now() + timedelta(hours=31)
                 print(f"\nNext spins will start at {next_day.strftime('%Y-%m-%d %H:%M:%S')}")
                 time_until_next_day = (next_day - datetime.now()).total_seconds()
                 print(f"Countdown until next spins:")
