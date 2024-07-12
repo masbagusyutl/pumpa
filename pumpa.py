@@ -17,6 +17,18 @@ def spin_lottery(url, headers):
     else:
         print(f"[{datetime.now()}] Failed to spin lottery. Status Code: {response.status_code}")
 
+# Function to complete a task
+def complete_task(url, headers, payload=None):
+    if payload:
+        response = requests.post(url, headers=headers, json=payload)
+    else:
+        response = requests.post(url, headers=headers)
+    
+    if response.status_code == 200:
+        print(f"[{datetime.now()}] Task completed successfully. Response: {response.json()}")
+    else:
+        print(f"[{datetime.now()}] Failed to complete task. Status Code: {response.status_code}")
+
 # Function to display countdown timer
 def countdown_timer(seconds):
     while seconds > 0:
@@ -26,17 +38,37 @@ def countdown_timer(seconds):
     print("\nCountdown complete.")
 
 # Function to process a single account
-def process_single_account(account, account_index, num_spins):
-    url = 'https://tg.pumpad.io/referral/api/v1/lottery'
+def process_single_account(account, account_index, num_spins, complete_tasks_first):
+    url_spin = 'https://tg.pumpad.io/referral/api/v1/lottery'
     headers = {
         'Authorization': account,
         'Content-Type': 'application/json'
     }
+
+    task_urls = [
+        'https://tg.pumpad.io/referral/api/v1/tg/missions/check/4',  # Task 1
+        'https://tg.pumpad.io/referral/api/v1/tg/missions/check/5',  # Task 2
+        'https://tg.pumpad.io/referral/api/v1/tg/missions/check/2',  # Task 3
+        'https://tg.pumpad.io/referral/api/v1/tg/missions/check/6'   # Task 4
+    ]
+
+    task_payloads = [
+        None,  # Task 1
+        None,  # Task 2
+        {"tg_channel_id": "-1002237269152"},  # Task 3
+        {"tg_channel_id": "-1002182502398"}   # Task 4
+    ]
+
     print(f"Using account {account_index}: {account}")
+
+    if complete_tasks_first:
+        for url, payload in zip(task_urls, task_payloads):
+            complete_task(url, headers, payload)
+            time.sleep(10)  # Wait 10 seconds between tasks
 
     for attempt in range(1, num_spins + 1):
         print(f"Attempt {attempt}:")
-        spin_lottery(url, headers)
+        spin_lottery(url_spin, headers)
         time.sleep(10)  # Wait 10 seconds between attempts
 
 # Main function to spin lottery
@@ -50,15 +82,17 @@ def spin_lottery_custom():
     if choice == '1':
         account_index = int(input(f"Enter the account number to process (1-{num_accounts}): ")) - 1
         num_spins = int(input("Enter the number of spins: "))
+        complete_tasks_first = input("Do you want to complete tasks first? (yes/no): ").lower() == 'yes'
         if 0 <= account_index < num_accounts:
-            process_single_account(accounts[account_index], account_index + 1, num_spins)
+            process_single_account(accounts[account_index], account_index + 1, num_spins, complete_tasks_first)
         else:
             print("Invalid account number.")
     elif choice == '2':
+        complete_tasks_first = input("Do you want to complete tasks first? (yes/no): ").lower() == 'yes'
         for day in range(1, 11):
             print(f"\nStarting lottery spins for day {day}...\n")
             for account_index, account in enumerate(accounts, start=1):
-                process_single_account(account, account_index, 10)
+                process_single_account(account, account_index, 10, complete_tasks_first)
                 if account_index < num_accounts:
                     print(f"Switching to the next account in 10 seconds...")
                     time.sleep(10)  # Wait 10 seconds before switching to the next account
